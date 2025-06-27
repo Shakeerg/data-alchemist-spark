@@ -1,8 +1,8 @@
 
-import LandingPage from "@/components/LandingPage";
+import DataAlchemistApp from "@/components/DataAlchemistApp";
 
 const Index = () => {
-  return <LandingPage />;
+  return <DataAlchemistApp />;
 };
 
 export default Index;
