@@ -9,7 +9,7 @@ import DataGrid from './DataGrid';
 import RuleBuilder from './RuleBuilder';
 import { useDataStore } from '@/hooks/useDataStore';
 import { Client, Worker, Task, ValidationError } from '@/types/data';
-import { Upload, Eye, Package, Bug } from 'lucide-react';
+import { Upload, Eye, Package, Bug, Zap } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const DataAlchemistApp: React.FC = () => {
