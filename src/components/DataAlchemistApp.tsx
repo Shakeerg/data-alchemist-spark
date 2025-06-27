@@ -28,31 +28,68 @@ const DataAlchemistApp: React.FC = () => {
   const [debugMode, setDebugMode] = useState(false);
 
   const parseCSV = (content: string): any[] => {
-    const lines = content.split('\n').filter(line => line.trim());
+    // Clean up any BOM or encoding issues
+    const cleanContent = content.replace(/^\uFEFF/, '').replace(/\0/g, '');
+    
+    const lines = cleanContent.split(/\r?\n/).filter(line => line.trim());
     if (lines.length === 0) return [];
     
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    // Parse CSV with proper quote handling
+    const parseCSVLine = (line: string): string[] => {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++; // Skip next quote
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      
+      result.push(current.trim());
+      return result;
+    };
+    
+    const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, ''));
     const rows = lines.slice(1).map(line => {
-      const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+      const values = parseCSVLine(line).map(v => v.replace(/"/g, ''));
       const row: any = {};
+      
       headers.forEach((header, index) => {
         let value = values[index] || '';
         
         // Smart parsing for different data types
         if (header.includes('IDs') || header.includes('Skills') || header.includes('Phases')) {
-          row[header] = value ? value.split(';').map(v => v.trim()) : [];
+          row[header] = value ? value.split(';').map(v => v.trim()).filter(v => v) : [];
         } else if (header.includes('Slots')) {
           try {
             row[header] = JSON.parse(value);
           } catch {
-            row[header] = value ? value.split(';').map(v => parseInt(v.trim())).filter(v => !isNaN(v)) : [];
+            row[header] = value ? value.split(';').map(v => {
+              const num = parseInt(v.trim());
+              return isNaN(num) ? 0 : num;
+            }).filter(v => v !== 0) : [];
           }
         } else if (header.includes('Level') || header.includes('Duration') || header.includes('Load') || header.includes('Concurrent')) {
-          row[header] = parseInt(value) || 0;
+          const num = parseInt(value);
+          row[header] = isNaN(num) ? 0 : num;
         } else {
           row[header] = value;
         }
       });
+      
       return row;
     });
     
@@ -61,8 +98,22 @@ const DataAlchemistApp: React.FC = () => {
 
   const handleFileUpload = useCallback(async (file: File, type: 'clients' | 'workers' | 'tasks') => {
     try {
-      const content = await file.text();
+      // Read file with proper encoding detection
+      const arrayBuffer = await file.arrayBuffer();
+      const decoder = new TextDecoder('utf-8');
+      let content = decoder.decode(arrayBuffer);
+      
+      // If content looks garbled, try with different encoding
+      if (content.includes('�') || /[^\x00-\x7F\u00A0-\uFFFF]/.test(content)) {
+        const decoder2 = new TextDecoder('windows-1252');
+        content = decoder2.decode(arrayBuffer);
+      }
+      
       const parsedData = parseCSV(content);
+      
+      if (parsedData.length === 0) {
+        throw new Error('No data found in file');
+      }
       
       switch (type) {
         case 'clients':
@@ -80,15 +131,16 @@ const DataAlchemistApp: React.FC = () => {
       validateData();
       
       toast({
-        title: "Success!",
+        title: "✨ Success!",
         description: `${parsedData.length} ${type} records loaded successfully`,
       });
       
       setActiveTab('data');
     } catch (error) {
+      console.error('File upload error:', error);
       toast({
         title: "Error",
-        description: `Failed to parse ${file.name}. Please check the file format.`,
+        description: `Failed to parse ${file.name}. Please check the file format and encoding.`,
         variant: "destructive"
       });
     }
