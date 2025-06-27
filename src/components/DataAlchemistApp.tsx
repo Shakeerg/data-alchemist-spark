@@ -291,8 +291,8 @@ const DataAlchemistApp: React.FC = () => {
     }, 100);
     
     toast({
-      title: "Sample Data Loaded",
-      description: "Ready to start your alchemy!",
+      title: "✨ Sample Data Loaded",
+      description: "Drop your file. We'll do the rest.",
     });
     
     setActiveTab('data');
@@ -309,6 +309,7 @@ const DataAlchemistApp: React.FC = () => {
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-yellow-200 bg-clip-text text-transparent">
             🧙‍♂️ Data Alchemist Workshop
           </h1>
+          <p className="text-purple-200 mb-4">This grid's smarter than it looks.</p>
           <div className="flex justify-center gap-4 mb-4">
             <Badge variant="outline" className="text-white">
               {totalRecords} Records Loaded
@@ -331,7 +332,7 @@ const DataAlchemistApp: React.FC = () => {
               size="sm"
             >
               <Bug className="mr-2 h-4 w-4" />
-              Debug Mode {debugMode ? 'ON' : 'OFF'}
+              🐞 Debug Mode {debugMode ? 'ON' : 'OFF'}
             </Button>
             <Button
               onClick={exportData}
@@ -340,7 +341,7 @@ const DataAlchemistApp: React.FC = () => {
               disabled={totalRecords === 0}
             >
               <Package className="mr-2 h-4 w-4" />
-              Export Golden Data
+              💛 Export Golden Data
             </Button>
           </div>
         </div>
@@ -349,36 +350,49 @@ const DataAlchemistApp: React.FC = () => {
           <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="upload">
               <Upload className="mr-2 h-4 w-4" />
-              Upload
+              📤 Upload
             </TabsTrigger>
             <TabsTrigger value="data">
               <Eye className="mr-2 h-4 w-4" />
-              Data Grids
+              👁️ Data Grids
             </TabsTrigger>
             <TabsTrigger value="rules">
               <Zap className="mr-2 h-4 w-4" />
-              Rules
+              ⚡ Rules
             </TabsTrigger>
             <TabsTrigger value="export">
               <Package className="mr-2 h-4 w-4" />
-              Export
+              📦 Export
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upload" className="space-y-6">
-            <FileUpload onFileUpload={handleFileUpload} />
+            <Card className="magic-card">
+              <CardContent className="p-8 text-center">
+                <h2 className="text-2xl font-bold mb-4 glow-text">Step 1 – Upload</h2>
+                <p className="text-gray-300 mb-6">Drop your file. We'll do the rest.</p>
+                <FileUpload onFileUpload={handleFileUpload} />
+              </CardContent>
+            </Card>
             <div className="text-center">
               <Button
                 onClick={loadSampleData}
                 variant="outline"
                 className="magic-button"
               >
-                Load Sample Data
+                📁 Load Sample Data
               </Button>
             </div>
           </TabsContent>
 
           <TabsContent value="data" className="space-y-6">
+            {totalRecords > 0 && (
+              <Card className="magic-card mb-4">
+                <CardContent className="p-4 text-center">
+                  <p className="text-purple-200 text-sm">Step 2 – Preview: Peek into the grid and spot the magic.</p>
+                </CardContent>
+              </Card>
+            )}
             {data.clients.length > 0 && (
               <DataGrid
                 data={data.clients}
@@ -409,8 +423,11 @@ const DataAlchemistApp: React.FC = () => {
             {totalRecords === 0 && (
               <Card className="magic-card">
                 <CardContent className="text-center p-12">
-                  <p className="text-gray-400 text-lg">
-                    No data uploaded yet. Go to the Upload tab to get started!
+                  <p className="text-gray-400 text-lg mb-4">
+                    No data uploaded yet. Drop your chaos here—we'll conjure structure.
+                  </p>
+                  <p className="text-sm text-purple-200">
+                    You're not lost. You're exploring.
                   </p>
                 </CardContent>
               </Card>
@@ -418,6 +435,11 @@ const DataAlchemistApp: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="rules" className="space-y-6">
+            <Card className="magic-card mb-4">
+              <CardContent className="p-4 text-center">
+                <p className="text-purple-200 text-sm">Step 3 – Rule Writing: Write simple rules. Get structured logic.</p>
+              </CardContent>
+            </Card>
             <RuleBuilder
               rules={data.rules}
               onAddRule={addRule}
@@ -427,9 +449,14 @@ const DataAlchemistApp: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="export" className="space-y-6">
+            <Card className="magic-card mb-4">
+              <CardContent className="p-4 text-center">
+                <p className="text-purple-200 text-sm">Step 4 – Export: Grab your golden output and rule the realm.</p>
+              </CardContent>
+            </Card>
             <Card className="magic-card">
               <CardHeader>
-                <CardTitle className="glow-text">Export Your Golden Data</CardTitle>
+                <CardTitle className="glow-text">📤 Export Your Golden Data</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -469,6 +496,9 @@ const DataAlchemistApp: React.FC = () => {
                           {warningCount}
                         </Badge>
                       </div>
+                      {errorCount === 0 && warningCount === 0 && (
+                        <p className="text-green-400 text-sm">✨ Auto-fixes suggested. You still have the final say.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -478,7 +508,7 @@ const DataAlchemistApp: React.FC = () => {
                   disabled={totalRecords === 0}
                 >
                   <Package className="mr-2 h-4 w-4" />
-                  Download Complete Export
+                  💛 Download Complete Export
                 </Button>
               </CardContent>
             </Card>
@@ -489,6 +519,7 @@ const DataAlchemistApp: React.FC = () => {
           <Card className="magic-card mt-8">
             <CardHeader>
               <CardTitle className="text-orange-400">🧪 Debug Information</CardTitle>
+              <p className="text-sm text-gray-300">Show me AI thoughts (for power users only 💥)</p>
             </CardHeader>
             <CardContent>
               <pre className="text-xs text-gray-300 bg-black/30 p-4 rounded overflow-auto">
